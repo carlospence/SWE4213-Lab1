@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import ItemCard from "./ItemCard";
 import CreateListingModal from "./CreateListingModal"; // Import your component
 import toast from "react-hot-toast";
@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 const Listings = ({ onSelectItem, myListings }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sortOption, setSortOption] = useState("default");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -70,6 +71,31 @@ const Listings = ({ onSelectItem, myListings }) => {
     fetchProducts();
   }, [myListings]);
 
+  const sortedProducts = useMemo(() => {
+    let sorted = [...products];
+    switch (sortOption) {
+      case "price-low":
+        sorted.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+        break;
+      case "price-high":
+        sorted.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+        break;
+      case "date-new":
+        sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        break;
+      case "date-old":
+        sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        break;
+      default:
+        // For non-myListings, keep random order, else default
+        if (!myListings) {
+          sorted = products; // already randomized in fetch
+        }
+        break;
+    }
+    return sorted;
+  }, [products, sortOption, myListings]);
+
   if (loading)
     return (
       <div className="text-slate-400 text-center py-20 italic">Loading...</div>
@@ -81,10 +107,24 @@ const Listings = ({ onSelectItem, myListings }) => {
         <h1 className="text-2xl font-bold text-white">
           {myListings ? "My Listings" : "Browse Listings"}
         </h1>
+        <div className="flex items-center space-x-2">
+          <label className="text-white text-sm">Sort By</label>
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-1 text-sm"
+          >
+            <option value="default">Default</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="date-new">Posted Date: Newest</option>
+            <option value="date-old">Posted Date: Oldest</option>
+          </select>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-        {products.map((product) => (
+        {sortedProducts.map((product) => (
           <ItemCard
             key={product.id}
             image={
