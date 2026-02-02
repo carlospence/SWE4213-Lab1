@@ -1,7 +1,16 @@
 import React from "react";
 import { format } from "date-fns";
+import { FiTrash } from "react-icons/fi";
 
-const ItemCard = ({ image, title, price, postedOn, onView }) => {
+const ItemCard = ({
+  image,
+  title,
+  price,
+  postedOn,
+  onView,
+  onDelete,
+  showDelete = false,
+}) => {
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex flex-col h-full">
       {/* --- Product Image Section --- */}
@@ -11,6 +20,18 @@ const ItemCard = ({ image, title, price, postedOn, onView }) => {
           alt={title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
+        {showDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full transition-colors"
+            title="Delete item"
+          >
+            <FiTrash size={16} />
+          </button>
+        )}
       </div>
 
       {/* --- Product Details Section --- */}

@@ -1,12 +1,40 @@
 import React, { useState, useEffect } from "react";
 import ItemCard from "./ItemCard";
 import CreateListingModal from "./CreateListingModal"; // Import your component
+import toast from "react-hot-toast";
 
 const Listings = ({ onSelectItem, myListings }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const deleteProduct = async (product) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:3000/products/${product.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (response.ok) {
+        fetchProducts(); // Re-fetch the list after deletion
+        toast.success(`Product (${product.title}) deleted successfully`);
+      } else {
+        // toast.error("Failed to delete product");
+        throw new Error("Failed to delete product");
+      }
+    } catch (err) {
+      toast.error("Failed to delete product");
+      // Do nothing
+    }
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -66,6 +94,8 @@ const Listings = ({ onSelectItem, myListings }) => {
             title={product.title}
             price={product.price}
             postedOn={product.created_at}
+            showDelete={myListings}
+            onDelete={() => deleteProduct(product)}
             onView={() => onSelectItem(product)}
           />
         ))}
