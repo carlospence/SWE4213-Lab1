@@ -20,8 +20,7 @@ router.get("/products/mylistings", authcheck, async (req, res) => {
     try {
         const userEmail = req.user.email;
         const result = await pool.query(
-            "SELECT * FROM products ORDER BY id DESC",
-            [userEmail]
+            "SELECT * FROM products WHERE owner_email = $1 ORDER BY id DESC", [userEmail]
         );
         res.json(result.rows);
     } catch (err) {
