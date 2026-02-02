@@ -13,3 +13,11 @@ CREATE TABLE IF NOT EXISTS products (
     image_url TEXT,
     owner_email VARCHAR(255) REFERENCES users(email) ON DELETE CASCADE
 );
+
+-- 3. Add created_at column to products table if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'created_at') THEN
+        ALTER TABLE products ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+    END IF;
+END $$;
