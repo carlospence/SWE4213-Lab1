@@ -3,10 +3,11 @@ import ItemCard from "./ItemCard";
 import CreateListingModal from "./CreateListingModal"; // Import your component
 import toast from "react-hot-toast";
 
-const Listings = ({ onSelectItem, myListings }) => {
+const Listings = ({ onSelectItem, myListings, searchText }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortOption, setSortOption] = useState("default");
+  const [searchTerm, setSearchTerm] = useState(searchText || "");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -71,30 +72,43 @@ const Listings = ({ onSelectItem, myListings }) => {
     fetchProducts();
   }, [myListings]);
 
-  const sortedProducts = useMemo(() => {
-    let sorted = [...products];
+  useEffect(() => {
+    setSearchTerm(searchText || "");
+  }, [searchText]);
+
+  const filteredProducts = useMemo(() => {
+    let filtered = products.filter((product) =>
+      product.title.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+
     switch (sortOption) {
       case "price-low":
-        sorted.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+        filtered.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
         break;
       case "price-high":
-        sorted.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+        filtered.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
         break;
       case "date-new":
-        sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        filtered.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at),
+        );
         break;
       case "date-old":
-        sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        filtered.sort(
+          (a, b) => new Date(a.created_at) - new Date(b.created_at),
+        );
         break;
       default:
         // For non-myListings, keep random order, else default
         if (!myListings) {
-          sorted = products; // already randomized in fetch
+          filtered = products.filter((product) =>
+            product.title.toLowerCase().includes(searchTerm.toLowerCase()),
+          ); // already randomized in fetch
         }
         break;
     }
-    return sorted;
-  }, [products, sortOption, myListings]);
+    return filtered;
+  }, [products, sortOption, searchTerm, myListings]);
 
   if (loading)
     return (
@@ -105,26 +119,37 @@ const Listings = ({ onSelectItem, myListings }) => {
     <>
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-white">
-          {myListings ? "My Listings" : "Browse Listings"}
+          {myListings
+            ? `My Listings (${filteredProducts.length})`
+            : `Browse Listings (${filteredProducts.length})`}
         </h1>
-        <div className="flex items-center space-x-2">
-          <label className="text-white text-sm">Sort By</label>
-          <select
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
-            className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-1 text-sm"
-          >
-            <option value="default">Default</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="date-new">Posted Date: Newest</option>
-            <option value="date-old">Posted Date: Oldest</option>
-          </select>
+        <div className="flex items-center space-x-4">
+          {/* <input
+            type="text"
+            placeholder="Search listings..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-1 text-sm w-48"
+          /> */}
+          <div className="flex items-center space-x-2">
+            <label className="text-white text-sm">Sort By</label>
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-1 text-sm"
+            >
+              <option value="default">Default</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="date-new">Date: Newest</option>
+              <option value="date-old">Date: Oldest</option>
+            </select>
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-        {sortedProducts.map((product) => (
+        {filteredProducts.map((product) => (
           <ItemCard
             key={product.id}
             image={
