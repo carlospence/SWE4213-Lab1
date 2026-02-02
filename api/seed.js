@@ -1,10 +1,15 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 
-const pool = new Pool({
-    connectionString: "postgres://<username>:<password>@localhost:5432/unb_marketplace"
-});
+// const pool = new Pool({
+//     connectionString: "postgres://<username>:<password>@localhost:5432/unb_marketplace"
+// });
 
+const connString = `postgres://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PG_HOST}:${process.env.PG_PORT}/${process.env.PG_DATABASE}`;
+
+const pool = new Pool({
+    connectionString: connString
+});
 const SALT_ROUNDS = 10;
 
 const seed = async () => {
