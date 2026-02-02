@@ -1,10 +1,11 @@
 // src/App.jsx
-import { useState } from 'react'
-import Footer from './components/Footer'
-import Header from './components/Header'
-import AuthContainer from './components/AuthContainer'
-import ContactModal from './components/ContactModal'
-import Listings from './components/Listings' // 1. Import the new component
+import { useState } from "react";
+import { Toaster } from "react-hot-toast";
+import Footer from "./components/Footer";
+import Header from "./components/Header";
+import AuthContainer from "./components/AuthContainer";
+import ContactModal from "./components/ContactModal";
+import Listings from "./components/Listings"; // 1. Import the new component
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -12,13 +13,14 @@ function App() {
   const [myListings, setMyListings] = useState(false);
 
   function onLogout() {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     setIsLoggedIn(false);
     setMyListings(false);
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-950">
+      <Toaster />
       {!isLoggedIn ? (
         <div className="flex-grow flex items-center justify-center px-6">
           <AuthContainer onLoginClick={() => setIsLoggedIn(true)} />
@@ -28,7 +30,10 @@ function App() {
           <Header setMyListings={setMyListings} onLogout={onLogout} />
 
           <main className="flex-grow px-[50px] py-10">
-            <Listings onSelectItem={(item) => setSelectedItem(item)} myListings={myListings} />
+            <Listings
+              onSelectItem={(item) => setSelectedItem(item)}
+              myListings={myListings}
+            />
           </main>
 
           <Footer />
@@ -42,7 +47,7 @@ function App() {
         </>
       )}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
