@@ -4,7 +4,7 @@ This README shows you how to get the project up and running.
 
 ## AI Statement
 
-I used Github Co-pilot to solve 3 bugs, 4 enhancement and to re-write the Sql Queries to Prisma logic.
+I used Github Co-pilot to solve 3 bugs, 4 enhancements and to re-write the Sql Queries to Prisma logic.
 
 ## Changes
 
