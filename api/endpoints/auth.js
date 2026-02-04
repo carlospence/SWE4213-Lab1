@@ -3,12 +3,12 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const router = express.Router();
 const authcheck = require("../middleware/authcheck");
+const { prisma } = require('../lib/prisma.js');
 
-const SECRET_KEY = "unb_marketplace_secret_key";
+const SECRET_KEY = process.env.JWT_SECRET;
 const SALT_ROUNDS = 10;
 
 router.post("/auth/register", async (req, res) => {
-    const pool = req.app.get('db');
     const { email, password } = req.body; // Changed 'username' to 'email' to match your schema
 
     if (!email.toLowerCase().endsWith("@unb.ca")) {
@@ -19,19 +19,16 @@ router.post("/auth/register", async (req, res) => {
 
     try {
         // 1. Check if user already exists
-        const userExists = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-        if (userExists.rows.length > 0) {
+        const userExists = await prisma.users.findUnique({ where: { email } });
+        if (userExists) {
             return res.status(409).json({ message: "User already exists" });
         }
 
         // 2. Hash the password
         const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-        // 3. Insert into PostgreSQL
-        await pool.query(
-            "INSERT INTO users (email, password) VALUES ($1, $2)",
-            [email, hashedPassword]
-        );
+        // 3. Insert user via Prisma
+        await prisma.users.create({ data: { email, password: hashedPassword } });
 
         res.status(201).json({ message: "User registered successfully" });
     } catch (err) {
@@ -41,13 +38,11 @@ router.post("/auth/register", async (req, res) => {
 });
 
 router.post("/auth/login", async (req, res) => {
-    const pool = req.app.get('db');
     const { email, password } = req.body;
 
     try {
         // 1. Find user by email
-        const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-        const user = result.rows[0];
+        const user = await prisma.users.findUnique({ where: { email } });
 
         if (user) {
             // 2. Compare password with the stored hash
@@ -76,12 +71,13 @@ router.post("/auth/login", async (req, res) => {
 });
 
 router.get("/auth/status", authcheck, async (req, res) => {
-    const pool = req.app.get('db');
 
     try {
         // Find user by the ID attached to req.user by the authcheck middleware
-        const result = await pool.query("SELECT id, email FROM users WHERE id = $1", [req.user.userId]);
-        const user = result.rows[0];
+        const user = await prisma.users.findUnique({
+            where: { id: Number(req.user.userId) },
+            select: { id: true, email: true }
+        });
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });

@@ -1,16 +1,11 @@
 require('dotenv').config();
-const { Pool } = require('pg');
+const { prisma } = require('./lib/prisma');
 const bcrypt = require('bcrypt');
 
 // const pool = new Pool({
 //     connectionString: "postgres://<username>:<password>@localhost:5432/unb_marketplace"
 // });
 
-const connString = `postgres://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PG_HOST}:${process.env.PG_PORT}/${process.env.PG_DATABASE}`;
-
-const pool = new Pool({
-    connectionString: connString
-});
 const SALT_ROUNDS = 10;
 
 const seed = async () => {
@@ -18,17 +13,15 @@ const seed = async () => {
         console.log("Starting seed process...");
 
         // 1. Clear existing data
-        await pool.query('TRUNCATE products, users RESTART IDENTITY CASCADE');
+        await prisma.products.deleteMany();
+        await prisma.users.deleteMany();
 
         // 2. Hash the password
         const hashedPassword = await bcrypt.hash("123456789", SALT_ROUNDS);
 
         // 3. Insert Test User
         const testEmail = 'test@unb.ca';
-        await pool.query(
-            'INSERT INTO users (email, password) VALUES ($1, $2)',
-            [testEmail, hashedPassword]
-        );
+        await prisma.users.create({ data: { email: testEmail, password: hashedPassword } });
 
         // 4. Generate 20 Products
         const items = [
@@ -46,13 +39,11 @@ const seed = async () => {
             const price = Math.floor(Math.random() * 200) + 10; // Random price between 10 and 210
             const image_url = `https://picsum.photos/seed/unb${i + 1}/400/400`;
 
-            await pool.query(
-                'INSERT INTO products (title, price, image_url, owner_email) VALUES ($1, $2, $3, $4)',
-                [title, price, image_url, testEmail]
-            );
+            await prisma.products.create({ data: { title, price: Number(price), image_url, owner_email: testEmail } });
         }
 
         console.log("Database seeded successfully with 1 user and 20 products!");
+        await prisma.$disconnect();
         process.exit();
     } catch (err) {
         console.error("Seed error:", err);

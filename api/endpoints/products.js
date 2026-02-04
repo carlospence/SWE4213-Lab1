@@ -1,28 +1,37 @@
 const express = require("express");
 const authcheck = require("../middleware/authcheck");
 const router = express.Router();
+//import prisma from '../lib/prisma';
+const { prisma } = require('../lib/prisma.js');
+
+
 
 // GET /products - Get all products
 router.get("/products", authcheck, async (req, res) => {
-    const pool = req.app.get('db'); // Access the global pool
     try {
-        const result = await pool.query("SELECT * FROM products ORDER BY id DESC");
-        res.json(result.rows);
+        const products = await prisma.products.findMany({
+            orderBy: {
+                id: "desc",
+            },
+        });
+        res.json(products);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Database error fetching products" });
+    } finally {
+        await prisma.$disconnect();
     }
 });
 
 // GET /products/mylistings - Get products for the logged-in user
 router.get("/products/mylistings", authcheck, async (req, res) => {
-    const pool = req.app.get('db');
     try {
         const userEmail = req.user.email;
-        const result = await pool.query(
-            "SELECT * FROM products WHERE owner_email = $1 ORDER BY id DESC", [userEmail]
-        );
-        res.json(result.rows);
+        const products = await prisma.products.findMany({
+            where: { owner_email: userEmail },
+            orderBy: { id: 'desc' }
+        });
+        res.json(products);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Database error fetching your listings" });
@@ -31,16 +40,19 @@ router.get("/products/mylistings", authcheck, async (req, res) => {
 
 // POST /products - Create a new listing
 router.post("/products", authcheck, async (req, res) => {
-    const pool = req.app.get('db');
     const { title, price, image_url } = req.body;
     const owner_email = req.user.email;
 
     try {
-        const result = await pool.query(
-            "INSERT INTO products (title, price, image_url, owner_email) VALUES ($1, $2, $3, $4) RETURNING *",
-            [title, price, image_url, owner_email]
-        );
-        res.status(201).json(result.rows[0]);
+        const created = await prisma.products.create({
+            data: {
+                title,
+                price: Number(price),
+                image_url,
+                owner_email
+            }
+        });
+        res.status(201).json(created);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Database error creating product" });
@@ -48,16 +60,16 @@ router.post("/products", authcheck, async (req, res) => {
 });
 
 router.delete("/products/:id", authcheck, async (req, res) => {
-    const pool = req.app.get('db');
     const id = Number(req.params.id);
 
     try {
-        const result = await pool.query("DELETE FROM products WHERE id = $1 RETURNING *", [id]);
-        if (result.rows.length === 0) {
+        const deleted = await prisma.products.delete({ where: { id } });
+        res.json({ message: "Product deleted", deleted });
+    } catch (err) {
+        // Prisma will throw if record not found (P2025)
+        if (err && err.code === 'P2025') {
             return res.status(404).json({ error: "Product not found" });
         }
-        res.json({ message: "Product deleted", deleted: result.rows[0] });
-    } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Database error deleting product" });
     }

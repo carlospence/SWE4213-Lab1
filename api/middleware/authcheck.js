@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 // Note: We should never expose our secret key in the code
-const SECRET_KEY = "unb_marketplace_secret_key";
+const SECRET_KEY = process.env.JWT_SECRET;
 
 function authcheck(req, res, next) {
     const header = req.headers.authorization;
@@ -14,7 +14,7 @@ function authcheck(req, res, next) {
 
     try {
         const payload = jwt.verify(token, SECRET_KEY);
-        req.user = payload; 
+        req.user = payload;
         next();
     } catch (err) {
         return res.status(401).json({ error: "Invalid or expired token" });
