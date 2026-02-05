@@ -5,7 +5,21 @@ const router = express.Router();
 const { prisma } = require('../lib/prisma.js');
 
 router.get("/", async (req, res) => {
-    res.json({ message: `Welcome to the ${process.env.APP_NAME ?? "UNB Default Marketplace API"}` });
+
+    try {
+        const products = await prisma.products.findMany({
+            orderBy: {
+                id: "desc",
+            },
+        });
+        res.json({ message: `Welcome to the ${process.env.APP_NAME ?? "UNB Default Marketplace API"}`, totalProducts: products.length });
+        // res.json(products);
+    } catch (err) {
+        console.error(err);
+        res.json({ message: `Welcome to the ${process.env.APP_NAME ?? "UNB Default Marketplace API"}` });
+    } finally {
+        await prisma.$disconnect();
+    }
 });
 
 // GET /products - Get all products
