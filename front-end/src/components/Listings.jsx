@@ -10,21 +10,19 @@ const Listings = ({ onSelectItem, myListings, searchText }) => {
   const [searchTerm, setSearchTerm] = useState(searchText || "");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   // Delete a product listing
   const deleteProduct = async (product) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:3000/products/${product.id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await fetch(`${apiUrl}/products/${product.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       if (response.ok) {
         fetchProducts(); // Re-fetch the list after deletion
@@ -44,8 +42,8 @@ const Listings = ({ onSelectItem, myListings, searchText }) => {
     try {
       const token = localStorage.getItem("token");
       const endpoint = myListings
-        ? "http://localhost:3000/products/mylistings"
-        : "http://localhost:3000/products";
+        ? `${apiUrl}/products/mylistings`
+        : `${apiUrl}/products`;
 
       const response = await fetch(endpoint, {
         method: "GET",
