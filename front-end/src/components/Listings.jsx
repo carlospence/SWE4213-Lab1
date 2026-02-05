@@ -11,6 +11,7 @@ const Listings = ({ onSelectItem, myListings, searchText }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Delete a product listing
   const deleteProduct = async (product) => {
     try {
       const token = localStorage.getItem("token");
@@ -76,6 +77,7 @@ const Listings = ({ onSelectItem, myListings, searchText }) => {
     setSearchTerm(searchText || "");
   }, [searchText]);
 
+  // Filter and sort products based on search term and sort option
   const filteredProducts = useMemo(() => {
     let filtered = products.filter((product) =>
       product.title.toLowerCase().includes(searchTerm.toLowerCase()),

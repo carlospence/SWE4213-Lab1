@@ -1,26 +1,12 @@
 const express = require("express");
 const authcheck = require("../middleware/authcheck");
+const resetdb = require("../lib/resetdb");
 const router = express.Router();
 //import prisma from '../lib/prisma';
 const { prisma } = require('../lib/prisma.js');
 
-router.get("/", async (req, res) => {
 
-    try {
-        const products = await prisma.products.findMany({
-            orderBy: {
-                id: "desc",
-            },
-        });
-        res.json({ message: `Welcome to the ${process.env.APP_NAME ?? "UNB Default Marketplace API"}`, totalProducts: products.length });
-        // res.json(products);
-    } catch (err) {
-        console.error(err);
-        res.json({ message: `Welcome to the ${process.env.APP_NAME ?? "UNB Default Marketplace API"}` });
-    } finally {
-        await prisma.$disconnect();
-    }
-});
+
 
 // GET /products - Get all products
 router.get("/products", authcheck, async (req, res) => {
@@ -75,6 +61,7 @@ router.post("/products", authcheck, async (req, res) => {
     }
 });
 
+// DELETE /products/:id - Delete a listing by ID
 router.delete("/products/:id", authcheck, async (req, res) => {
     const id = Number(req.params.id);
 

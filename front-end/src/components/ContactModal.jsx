@@ -6,6 +6,8 @@ import toast from "react-hot-toast";
 const ContactModal = ({ isOpen, onClose, email, title }) => {
   if (!isOpen) return null;
   const [copiedText, copy] = useCopyToClipboard();
+
+  // Handle copy email to clipboard
   const handleCopy = (text) => () => {
     copy(text)
       .then(() => {

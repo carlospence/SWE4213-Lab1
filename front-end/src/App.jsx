@@ -19,6 +19,7 @@ function App() {
     setMyListings(false);
   }
 
+  // Function to parse JWT token
   function parseJwt(token) {
     try {
       const base64Url = token.split(".")[1];

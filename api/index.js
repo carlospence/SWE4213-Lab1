@@ -31,4 +31,7 @@ app.use('/', authRoutes);
 const productRoutes = require('./endpoints/products');
 app.use('/', productRoutes);
 
+const configRoutes = require('./endpoints/config');
+app.use('/', configRoutes);
+
 app.listen(3000, () => console.log('Server running on port 3000'));
