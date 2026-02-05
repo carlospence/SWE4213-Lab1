@@ -5,7 +5,7 @@ const router = express.Router();
 const { prisma } = require('../lib/prisma.js');
 
 router.get("/", async (req, res) => {
-    res.json({ message: "Welcome to the UNB Marketplace API" });
+    res.json({ message: `Welcome to the ${process.env.APP_NAME ?? "UNB Default Marketplace API"}` });
 });
 
 // GET /products - Get all products

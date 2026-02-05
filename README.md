@@ -8,7 +8,15 @@ I used Github Co-pilot to solve 3 bugs, 4 enhancements and to re-write the Sql Q
 
 ## Changes
 
-I moved the database information and JWT Secret Key to .env file and created a sample .env file.
+I moved the database information and JWT Secret Key to .env file and created a sample .env file with the following information
+
+*PG_HOST=localhost*
+*PG_PORT=5432*
+*PG_DATABASE=unb_marketplace*
+*PG_USER=######*
+*PG_PASSWORD=######*
+*JWT_SECRET=unb_marketplace_secret_key*
+*APP_NAME=UNB Marketplace API*
 
 I changed the seed.js sql queries to prisma logic.
 
