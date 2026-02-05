@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const authcheck = require("../middleware/authcheck");
+const { resetdb } = require("../lib/resetdb");
 const { prisma } = require('../lib/prisma.js');
 
 // GET / - Welcome message with total products count

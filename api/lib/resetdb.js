@@ -41,15 +41,15 @@ const resetdb = async () => {
 
         console.log("Database seeded successfully with 1 user and 20 products!");
         await prisma.$disconnect();
-        process.exit();
+        // process.exit();
     } catch (err) {
         console.error("Seed error:", err);
-        process.exit(1);
+        // process.exit(1);
     }
 };
 
 module.exports = { resetdb };
 
-if (require.main === module) {
-    resetdb();
-}
+// if (require.main === module) {
+//     resetdb();
+// }

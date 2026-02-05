@@ -1,6 +1,5 @@
 const express = require("express");
 const authcheck = require("../middleware/authcheck");
-const resetdb = require("../lib/resetdb");
 const router = express.Router();
 //import prisma from '../lib/prisma';
 const { prisma } = require('../lib/prisma.js');
